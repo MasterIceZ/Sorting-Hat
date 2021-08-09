@@ -23,6 +23,7 @@ rate = [0.22, 0.26, 0.26, 0.26]
 @client.event
 async def on_ready() :
 	print("Hello Ice")
+	await client.change_presence(activity = discord.Activity(type=discord.ActivityType.watching, name="Harry Potter"))
 
 @client.event
 async def on_member_join(member):
