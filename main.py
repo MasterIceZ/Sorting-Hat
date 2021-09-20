@@ -43,9 +43,10 @@ async def on_message(msg):
 		return
 	if msg.content.startswith('?mute'):
 		await msg.add_reaction('👍')
+		await msg.add_reaction('👎')
 	if msg.content.startswith('?unmute'):
 		await msg.add_reaction('👍')
-
+		await msg.add_reaction('👎')
 @client.event
 async def on_raw_reaction_add(payload):
 	if payload.emoji.name == '👍':
@@ -77,21 +78,43 @@ async def on_raw_reaction_add(payload):
 					return 
 				print(msg.content.split()[0])
 				if msg.content.split()[0] == '?mute':
-					await tar.edit(mute=True)
-					await msg.delete()
+					try:
+						await tar.edit(mute=True)
+					except:
+						pass
+					
 				elif msg.content.split()[0] == '?unmute':
-					await tar.edit(mute=False)
-					await msg.delete()
+					try:
+						await tar.edit(mute=False)
+					except:
+						pass
+				await msg.delete()
 			else :
 				tg = get(chan.guild.roles, id=int(target))
 				for person in chan.members:
 					if tg in person.roles:
 						if msg.content.split()[0] == '?mute':
-							await person.edit(mute=True)
-							await msg.delete()
+							try:
+								await person.edit(mute=True)
+							except:
+								pass
 						elif msg.content.split()[0] == '?unmute':
-							await person.edit(mute=False)
-							await msg.delete()
-					
+							try:
+								await person.edit(mute=False)
+							except:
+								pass
+				await msg.delete()
+	elif payload.emoji.name == '👎':
+		chan = client.get_channel(867366262716104724)
+		msg = await chan.fetch_message(payload.message_id)
+		reaction = get(msg.reactions, emoji=payload.emoji.name)
+		com = msg.content.split()[0]
+		if reaction and reaction.count >= 4:
+			if com == '?mute' or com == '?unmute':
+				try:
+					await msg.delete()
+				except:
+					pass
+
 alive()
 client.run(token)
