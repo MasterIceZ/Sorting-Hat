@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import os
-import asyncio
 from numpy.random import choice
 from runner import alive
 
@@ -53,23 +52,46 @@ async def on_raw_reaction_add(payload):
 		chan = client.get_channel(867366262716104724)
 		msg = await chan.fetch_message(payload.message_id)
 		reaction = get(msg.reactions, emoji=payload.emoji.name)
-		print(reaction)
+		print(msg.content.split()[1])
 		if reaction and reaction.count >= 4:
-			target = msg.content.split()[1].split('<@!')[1].split('>')[0]
+			if msg.content.split()[0] == '?mute' or msg.content.split()[0] == '?unmute':
+				target = msg.content.split()[1].split('<@')[1].split('>')[0]
+			else :
+				return
 			print(target)
-			tar = str()
-			for person in chan.members:
-				if str(person.id) == str(target):
-					tar = person
-					print('found')
-					break
-			print(msg.content.split()[0])
-			if msg.content.split()[0] == '?mute':
-				await tar.edit(mute=True)
-				await msg.delete()
-			elif msg.content.split()[0] == '?unmute':
-				await tar.edit(mute=False)
-				await msg.delete()
-
+			tar = str("NOT")
+			p = False
+			if target.startswith('!'):
+				p = True
+				target = target.split('!')[1]
+			else :
+				p = False
+				target = target.split('&')[1]
+			
+			if p == True:
+				for person in chan.members:
+					if str(person.id) == str(target):
+						tar = person
+						break
+				if tar == "NOT":
+					return 
+				print(msg.content.split()[0])
+				if msg.content.split()[0] == '?mute':
+					await tar.edit(mute=True)
+					await msg.delete()
+				elif msg.content.split()[0] == '?unmute':
+					await tar.edit(mute=False)
+					await msg.delete()
+			else :
+				tg = get(chan.guild.roles, id=int(target))
+				for person in chan.members:
+					if tg in person.roles:
+						if msg.content.split()[0] == '?mute':
+							await person.edit(mute=True)
+							await msg.delete()
+						elif msg.content.split()[0] == '?unmute':
+							await person.edit(mute=False)
+							await msg.delete()
+					
 alive()
 client.run(token)
